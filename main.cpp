@@ -35,12 +35,17 @@ public:
         return *this;
     }
 
-    //TODO обработать запрос элемента не находящегося в массиве
     T &operator[](size_t pos) {
+        if (pos >= size_){
+            exit(1);
+        }
         return data_[pos];
     }
 
     const T &operator[](size_t pos) const {
+        if (pos >= size_){
+            exit(1);
+        }
         return data_[pos];
     }
 
@@ -62,38 +67,44 @@ public:
         data_[end_] = 0;
     }
 
-    void place_start(const T &value){
+    void place_start(const T &value) {
         start_--;
-        if (start_ == -1){
+        if (start_ == -1) {
             start_ = size_ - 1;
         }
         data_ = value;
     }
 
-    void delete_start(){
+    void delete_start() {
         data_[start_] = 0;
         start_++;
         if (start_ == size_)
             start_ = 0;
     }
 
-    T &start(){
+    T &start() {
         return data_[start_];
     }
 
-    T &end(){
+    T &end() {
         return data_[end_];
     }
 
-    void resize(const size_t & new_size){
-
+    void resize(const size_t &new_size) {
+        T *tmp = data_;
+        delete [] data_;
+        data_ = new T[new_size];
+        for (size_t i = 0; i < new_size && i < size_; i++) {
+            data_[i] = tmp[i];
+        }
+        delete [] tmp;
     }
 };
 
 
 int main() {
-    circular_buffer<int> a(2);
-    a.start() += 1;
+    circular_buffer<int> a(2,1);
+    a.resize(4);
     for (size_t i = 0; i < a.size(); i++)
         std::cout << a[i] << " ";
     return 0;
