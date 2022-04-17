@@ -94,8 +94,15 @@ public:
         T *tmp = data_;
         delete [] data_;
         data_ = new T[new_size];
-        for (size_t i = 0; i < new_size && i < size_; i++) {
-            data_[i] = tmp[i];
+        size_t current = start_;
+        size_t capacity;
+        if (end_ > start_){
+            capacity = end_ - start_;
+        } else {
+            capacity = end_ + size_ - start_;
+        }
+        for (size_t i = 0; i < new_size && i < capacity; i++, current++) {
+            data_[i] = tmp[current];
         }
         delete [] tmp;
     }
