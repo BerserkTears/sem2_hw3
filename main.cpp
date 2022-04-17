@@ -103,7 +103,7 @@ public:
         }
         for (size_t i = 0; i < new_size && i < capacity; i++, current++) {
             tmp[i] = data_[current];
-            if (current == size_){
+            if (current == size_) {
                 current = 0;
             }
         }
@@ -115,8 +115,8 @@ public:
 
 // Часть 2
 
-void Print_Bool(bool B){
-    if(B)
+void Print_Bool(bool B) {
+    if (B)
         std::cout << "True";
     else
         std::cout << "False";
@@ -133,20 +133,110 @@ bool all_of(T *begin, T *end, Pred pred) {
     return true;
 }
 
+template<typename T, typename Pred>
+bool any_of(T *begin, T *end, Pred pred) {
+    while (begin != end) {
+        if (pred(*begin)) {
+            return true;
+        }
+        begin++;
+    }
+    return false;
+}
+
+template<typename T, typename Pred>
+bool none_of(T *begin, T *end, Pred pred) {
+    while (begin != end) {
+        if (pred(*begin)) {
+            return false;
+        }
+        begin++;
+    }
+    return true;
+}
+
+template<typename T, typename Pred>
+bool one_of(T *begin, T *end, Pred pred) {
+    int count = 0;
+    while (begin != end) {
+        if (pred(*begin)) {
+            count++;
+        }
+        begin++;
+    }
+    if (count == 1)
+        return true;
+    else
+        return false;
+}
+
+template<typename T, typename Pred>
+bool is_sorted(T *begin, T *end, Pred pred) {
+    while (begin != end - 1) {
+        if (!pred(*begin, *(begin + 1))) {
+            return false;
+        }
+        begin++;
+    }
+    return true;
+}
+
+template<typename T, typename Pred>
+bool is_partitioned(T *begin, T *end, Pred pred) {
+    int amount = 0;
+    while (begin != end - 1) {
+        if (pred(*begin) != pred(*(begin + 1))) {
+            amount++;
+        }
+        begin++;
+    }
+    if (amount == 1)
+        return true;
+    else
+        return false;
+}
+
+template<typename T>
+T &find_not(T *begin, T *end, T element){
+   while (begin != end){
+       if(*begin != element)
+           return &begin;
+       begin++;
+   }
+    return nullptr;
+}
+
+template<typename T>
+T &find_backwards(T *begin, T *end, T element){
+    while (begin != end){
+        if(*end == element)
+            return &end;
+        end--;
+    }
+    return nullptr;
+}
+
+
+
 int main() {
-    circular_buffer<int> a(2,1);
+    circular_buffer<int> a(2, 1);
     a.resize(4);
     for (size_t i = 0; i < a.size(); i++)
         std::cout << a[i] << " ";
 
     int *A = new int[5];
-    A[0] = -1;
-    A[1] = 1;
-    A[2] = 0;
-    A[3] = 5;
-    A[4] = 8;
+    A[0] = 10;
+    A[1] = 9;
+    A[2] = 8;
+    A[3] = 7;
+    A[4] = 6;
+
     std::cout << std::endl;
-    Print_Bool(all_of(A, A + 4, [](int a) { return a < 10; }));
+    Print_Bool(any_of(A, A + 4, [](int a) { return a > 0; }));
+
+    std::cout << std::endl;
+    Print_Bool(is_sorted(A, A + 4, [](int a, int b) { return a > b; }));
+
     delete[]A;
     return 0;
 }
