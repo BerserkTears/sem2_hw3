@@ -1,5 +1,7 @@
 #include <iostream>
 
+// Часть 1
+
 template<typename T>
 class circular_buffer {
 private:
@@ -36,14 +38,14 @@ public:
     }
 
     T &operator[](size_t pos) {
-        if (pos >= size_){
+        if (pos >= size_) {
             exit(1);
         }
         return data_[pos];
     }
 
     const T &operator[](size_t pos) const {
-        if (pos >= size_){
+        if (pos >= size_) {
             exit(1);
         }
         return data_[pos];
@@ -91,28 +93,60 @@ public:
     }
 
     void resize(const size_t &new_size) {
-        T *tmp = data_;
-        delete [] data_;
-        data_ = new T[new_size];
+        T *tmp = new T[new_size];
         size_t current = start_;
         size_t capacity;
-        if (end_ > start_){
+        if (end_ > start_) {
             capacity = end_ - start_;
         } else {
             capacity = end_ + size_ - start_;
         }
         for (size_t i = 0; i < new_size && i < capacity; i++, current++) {
-            data_[i] = tmp[current];
+            tmp[i] = data_[current];
+            if (current == size_){
+                current = 0;
+            }
         }
-        delete [] tmp;
+        delete[] data_;
+        size_ = new_size;
+        data_ = tmp;
     }
 };
 
+// Часть 2
+
+void Print_Bool(bool B){
+    if(B)
+        std::cout << "True";
+    else
+        std::cout << "False";
+}
+
+template<typename T, typename Pred>
+bool all_of(T *begin, T *end, Pred pred) {
+    while (begin != end) {
+        if (!pred(*begin)) {
+            return false;
+        }
+        begin++;
+    }
+    return true;
+}
 
 int main() {
     circular_buffer<int> a(2,1);
     a.resize(4);
     for (size_t i = 0; i < a.size(); i++)
         std::cout << a[i] << " ";
+
+    int *A = new int[5];
+    A[0] = -1;
+    A[1] = 1;
+    A[2] = 0;
+    A[3] = 5;
+    A[4] = 8;
+    std::cout << std::endl;
+    Print_Bool(all_of(A, A + 4, [](int a) { return a < 10; }));
+    delete[]A;
     return 0;
 }
