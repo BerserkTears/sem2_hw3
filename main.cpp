@@ -1,16 +1,19 @@
 #include <iostream>
+#include <vector>
+#include "iterator"
+#include "cstddef"
 
 // Часть 1
 
 template<typename T>
 class circular_buffer {
-private:
+protected:
     T *data_; // Массив
     size_t size_; // Размер
     size_t end_, start_; // Указатели на конец и начало
 public:
     explicit circular_buffer(size_t size = 1, const T &value = 0)
-            : size_(size), data_(new T[size]), end_(0), start_(0) {
+            : size_(size + 10), data_(new T[size + 10]), end_(1), start_(0) {
         for (size_t i = 0; i < size_; i++)
             data_[i] = value;
     }
@@ -56,44 +59,93 @@ public:
     }
 
     void place_end(const T &value) {
-        data_[end_] = value;
+        data_[end_ - 1] = value;
         end_++;
-        if (end_ == size_)
-            end_ = 0;
+        if (end_ > size_)
+            end_ = 1;
+        if (end_ - 1 == start_)
+            start_++;
+        if (start_ == size_)
+            start_ = 0;
     }
 
     void delete_end() {
         end_--;
-        if (end_ == -1)
-            end_ = size_ - 1;
-        data_[end_] = 0;
+        if (end_ == 0)
+            end_ = size_;
+        data_[end_ - 1] = 0;
     }
 
     void place_start(const T &value) {
+        data_[start_] = value;
         start_--;
         if (start_ == -1) {
             start_ = size_ - 1;
         }
-        data_ = value;
+        if (start_ == end_)
+            end_--;
     }
 
     void delete_start() {
         data_[start_] = 0;
         start_++;
+        if (start_ == end_)
+            end_++;
+        if (end_ > size_)
+            end_ = 1;
         if (start_ == size_)
             start_ = 0;
     }
 
-    T &start() {
-        return data_[start_];
+    class Iterator {
+    public:
+        using iterator_category = std::random_access_iterator_tag;
+        using difference_type = std::ptrdiff_t;
+        using value_type = T;
+        using pointer = T *;
+        using reference = T &;
+
+        Iterator(pointer ptr, pointer ptrEnd, pointer ptrStart) :
+                ptr_(ptr), ptrEnd_(ptrEnd), ptrStart_(ptrStart) {}
+
+        reference operator*() const { return *ptr_; }
+
+        pointer operator->() { return ptr_; }
+
+        // Prefix increment
+        Iterator &operator++() {
+            ptr_++;
+            if (ptr_ == ptrEnd_) {
+                ptr_ = ptrStart_;
+            }
+            return *this;
+        }
+
+        // Postfix increment
+        Iterator operator++(int) {
+            Iterator tmp = *this;
+            ++(*this);
+            return tmp;
+        }
+
+        friend bool operator==(const Iterator &a, const Iterator &b) { return a.ptr_ == b.ptr_; };
+
+        friend bool operator!=(const Iterator &a, const Iterator &b) { return a.ptr_ != b.ptr_; };
+    private:
+        pointer ptr_;
+        pointer ptrEnd_, ptrStart_;
+    };
+
+    Iterator begin() {
+        return Iterator(&data_[start_], &data_[size_], &data_[0]);
     }
 
-    T &end() {
-        return data_[end_];
+    Iterator end() {
+        return Iterator(&data_[end_ - 1], &data_[size_], &data_[0]);
     }
 
     void resize(const size_t &new_size) {
-        T *tmp = new T[new_size];
+        T *tmp = new T[new_size + 1];
         size_t current = start_;
         size_t capacity;
         if (end_ > start_) {
@@ -101,14 +153,14 @@ public:
         } else {
             capacity = end_ + size_ - start_;
         }
-        for (size_t i = 0; i < new_size && i < capacity; i++, current++) {
+        for (size_t i = 0; i < new_size + 1 && i < capacity; i++, current++) {
             tmp[i] = data_[current];
             if (current == size_) {
                 current = 0;
             }
         }
         delete[] data_;
-        size_ = new_size;
+        size_ = new_size + 1;
         data_ = tmp;
     }
 };
@@ -197,34 +249,51 @@ bool is_partitioned(T *begin, T *end, Pred pred) {
 }
 
 template<typename T>
-T &find_not(T *begin, T *end, T element){
-   while (begin != end){
-       if(*begin != element)
-           return &begin;
-       begin++;
-   }
+T &find_not(T *begin, T *end, T element) {
+    while (begin != end) {
+        if (*begin != element)
+            return &begin;
+        begin++;
+    }
     return nullptr;
 }
 
 template<typename T>
-T &find_backwards(T *begin, T *end, T element){
-    while (begin != end){
-        if(*end == element)
+T &find_backwards(T *begin, T *end, T element) {
+    while (begin != end) {
+        if (*end == element)
             return &end;
         end--;
     }
     return nullptr;
 }
 
+template<typename T, typename Pred>
+bool is_palindrome(T *begin, T *end, Pred pred) {
+    int i = 0;
+    while (begin + i < end - i) {
+        if (pred(*(begin + i)) != pred(*(end - i))) {
+            return false;
+        }
+        i++;
+    }
+    return true;
+}
 
 
 int main() {
-    circular_buffer<int> a(2, 1);
+    circular_buffer<int> a(2);
     a.resize(4);
-    for (size_t i = 0; i < a.size(); i++)
-        std::cout << a[i] << " ";
+    a.place_end(1);
+    a.place_end(2);
+    a.place_end(3);
+    a.place_end(4);
+    a.place_end(5);
+    a.place_end(6);
+    for (auto aa: a)
+        std::cout << aa << std::endl;
 
-    int *A = new int[5];
+    std::vector<int> A(5);
     A[0] = 10;
     A[1] = 9;
     A[2] = 8;
@@ -232,11 +301,10 @@ int main() {
     A[4] = 6;
 
     std::cout << std::endl;
-    Print_Bool(any_of(A, A + 4, [](int a) { return a > 0; }));
+    Print_Bool(any_of(A.begin(), A.end(), [](int a) { return a > 0; }));
 
     std::cout << std::endl;
-    Print_Bool(is_sorted(A, A + 4, [](int a, int b) { return a > b; }));
+    Print_Bool(is_sorted(A.begin(), A.end(), [](int a, int b) { return a > b; }));
 
-    delete[]A;
     return 0;
 }
