@@ -70,10 +70,12 @@ public:
     }
 
     void delete_end() {
-        end_--;
-        data_[end_] = 0;
-        if (end_ == -1)
-            end_ = size_ - 1;
+        if (end_ != start_) {
+            end_--;
+            data_[end_] = 0;
+            if (end_ == -1)
+                end_ = size_ - 1;
+        }
     }
 
     void place_start(const T &value) {
@@ -91,10 +93,12 @@ public:
     }
 
     void delete_start() {
-        data_[start_] = 0;
-        start_++;
-        if (start_ == size_)
-            start_ = 0;
+        if (end_ != start_) {
+            data_[start_] = 0;
+            start_++;
+            if (start_ == size_)
+                start_ = 0;
+        }
     }
 
     class Iterator {
@@ -315,9 +319,6 @@ int main() {
     a.place_start(11);
     a.place_start(12);
     a.place_start(13);
-    a.delete_end();
-    a.delete_end();
-    a.delete_start();
     for (auto aa: a)
         std::cout << aa << " ";
 
