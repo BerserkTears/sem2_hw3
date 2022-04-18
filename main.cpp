@@ -13,7 +13,7 @@ protected:
     size_t end_, start_; // Указатели на конец и начало
 public:
     explicit circular_buffer(size_t size = 1, const T &value = 0)
-            : size_(size + 10), data_(new T[size + 10]), end_(1), start_(0) {
+            : size_(size + 1), data_(new T[size + 1]), end_(0), start_(0) {
         for (size_t i = 0; i < size_; i++)
             data_[i] = value;
     }
@@ -59,11 +59,11 @@ public:
     }
 
     void place_end(const T &value) {
-        data_[end_ - 1] = value;
+        data_[end_] = value;
         end_++;
-        if (end_ > size_)
-            end_ = 1;
-        if (end_ - 1 == start_)
+        if (end_ == size_)
+            end_ = 0;
+        if (end_ == start_)
             start_++;
         if (start_ == size_)
             start_ = 0;
@@ -71,28 +71,28 @@ public:
 
     void delete_end() {
         end_--;
-        if (end_ == 0)
-            end_ = size_;
-        data_[end_ - 1] = 0;
+        data_[end_] = 0;
+        if (end_ == -1)
+            end_ = size_ - 1;
     }
 
     void place_start(const T &value) {
-        data_[start_] = value;
         start_--;
         if (start_ == -1) {
             start_ = size_ - 1;
         }
-        if (start_ == end_)
+        data_[start_] = value;
+        if (start_ == end_) {
             end_--;
+            if (end_ == -1)
+                end_ = size_ - 1;
+        }
+
     }
 
     void delete_start() {
         data_[start_] = 0;
         start_++;
-        if (start_ == end_)
-            end_++;
-        if (end_ > size_)
-            end_ = 1;
         if (start_ == size_)
             start_ = 0;
     }
@@ -141,7 +141,7 @@ public:
     }
 
     Iterator end() {
-        return Iterator(&data_[end_ - 1], &data_[size_], &data_[0]);
+        return Iterator(&data_[end_], &data_[size_], &data_[0]);
     }
 
     void resize(const size_t &new_size) {
@@ -285,13 +285,41 @@ int main() {
     circular_buffer<int> a(2);
     a.resize(4);
     a.place_end(1);
+//    for (auto aa: a)
+//        std::cout << aa << " ";
+//    std::cout << std::endl;
     a.place_end(2);
+//    for (auto aa: a)
+//        std::cout << aa << " ";
+//    std::cout << std::endl;
     a.place_end(3);
+//    for (auto aa: a)
+//        std::cout << aa << " ";
+//    std::cout << std::endl;
+
     a.place_end(4);
+//    for (auto aa: a)
+//        std::cout << aa << " ";
+//    std::cout << std::endl;
+
     a.place_end(5);
+//    for (auto aa: a)
+//        std::cout << aa << " ";
+//    std::cout << std::endl;
     a.place_end(6);
+//    for (auto aa: a)
+//        std::cout << aa << " ";
+//    std::cout << std::endl;
+    a.delete_end();
+    a.place_start(10);
+    a.place_start(11);
+    a.place_start(12);
+    a.place_start(13);
+    a.delete_end();
+    a.delete_end();
+    a.delete_start();
     for (auto aa: a)
-        std::cout << aa << std::endl;
+        std::cout << aa << " ";
 
     std::vector<int> A(5);
     A[0] = 10;
