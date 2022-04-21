@@ -48,14 +48,17 @@ public:
     }
 
     const T &operator[](size_t pos) const {
-        if (pos >= size_) {
-            exit(1);
-        }
-        return data_[pos];
+        return data_[(start_ + pos) % size_];
     }
 
     size_t size() const {
-        return size_;
+        size_t currentSize;
+        if (end_ > start_) {
+            currentSize = end_ - start_;
+        } else {
+            currentSize = end_ + size_ - start_;
+        }
+        return currentSize;
     }
 
     void place_end(const T &value) {
@@ -116,7 +119,6 @@ public:
 
         pointer operator->() { return ptr_; }
 
-        // Prefix increment
         Iterator &operator++() {
             ptr_++;
             if (ptr_ == ptrEnd_) {
@@ -125,7 +127,6 @@ public:
             return *this;
         }
 
-        // Postfix increment
         Iterator operator++(int) {
             Iterator tmp = *this;
             ++(*this);
@@ -173,13 +174,13 @@ public:
 
 void Print_Bool(bool B) {
     if (B)
-        std::cout << "True";
+        std::cout << "True" << std::endl;
     else
-        std::cout << "False";
+        std::cout << "False" << std::endl;
 }
 
 template<typename T, typename Pred>
-bool all_of(T *begin, T *end, Pred pred) {
+bool all_of(T begin, T end, Pred pred) {
     while (begin != end) {
         if (!pred(*begin)) {
             return false;
@@ -190,7 +191,7 @@ bool all_of(T *begin, T *end, Pred pred) {
 }
 
 template<typename T, typename Pred>
-bool any_of(T *begin, T *end, Pred pred) {
+bool any_of(T begin, T end, Pred pred) {
     while (begin != end) {
         if (pred(*begin)) {
             return true;
@@ -201,7 +202,7 @@ bool any_of(T *begin, T *end, Pred pred) {
 }
 
 template<typename T, typename Pred>
-bool none_of(T *begin, T *end, Pred pred) {
+bool None_of(T begin, T end, Pred pred) {
     while (begin != end) {
         if (pred(*begin)) {
             return false;
@@ -212,7 +213,7 @@ bool none_of(T *begin, T *end, Pred pred) {
 }
 
 template<typename T, typename Pred>
-bool one_of(T *begin, T *end, Pred pred) {
+bool one_of(T begin, T end, Pred pred) {
     int count = 0;
     while (begin != end) {
         if (pred(*begin)) {
@@ -227,7 +228,7 @@ bool one_of(T *begin, T *end, Pred pred) {
 }
 
 template<typename T, typename Pred>
-bool is_sorted(T *begin, T *end, Pred pred) {
+bool is_sorted(T begin, T end, Pred pred) {
     while (begin != end - 1) {
         if (!pred(*begin, *(begin + 1))) {
             return false;
@@ -238,7 +239,7 @@ bool is_sorted(T *begin, T *end, Pred pred) {
 }
 
 template<typename T, typename Pred>
-bool is_partitioned(T *begin, T *end, Pred pred) {
+bool is_partitioned(T begin, T end, Pred pred) {
     int amount = 0;
     while (begin != end - 1) {
         if (pred(*begin) != pred(*(begin + 1))) {
@@ -252,31 +253,31 @@ bool is_partitioned(T *begin, T *end, Pred pred) {
         return false;
 }
 
-template<typename T>
-T &find_not(T *begin, T *end, T element) {
+template<typename T, typename U>
+constexpr T find_not(T begin, T end, const U &element) {
     while (begin != end) {
         if (*begin != element)
-            return &begin;
+            return begin;
         begin++;
     }
-    return nullptr;
+    return end;
 }
 
-template<typename T>
-T &find_backwards(T *begin, T *end, T element) {
+template<typename T, typename U>
+constexpr T find_backwards(T begin, T end, const U &element) {
     while (begin != end) {
         if (*end == element)
             return &end;
         end--;
     }
-    return nullptr;
+    return begin;
 }
 
 template<typename T, typename Pred>
-bool is_palindrome(T *begin, T *end, Pred pred) {
+bool is_palindrome(T begin, T end, Pred pred) {
     int i = 0;
     while (begin + i < end - i) {
-        if (pred(*(begin + i)) != pred(*(end - i))) {
+        if (!pred(*(begin + i), *(end - 1 - i))) {
             return false;
         }
         i++;
@@ -284,56 +285,79 @@ bool is_palindrome(T *begin, T *end, Pred pred) {
     return true;
 }
 
+template<typename T>
+void Print_Arr(T &arr) {
+    for (auto aa: arr)
+        std::cout << aa << " ";
+    std::cout << std::endl;
+}
+
+struct Student {
+    std::string surname;
+    int grade;
+};
 
 int main() {
     circular_buffer<int> a(2);
     a.resize(4);
+
     a.place_end(1);
-//    for (auto aa: a)
-//        std::cout << aa << " ";
-//    std::cout << std::endl;
+    Print_Arr(a);
+
     a.place_end(2);
-//    for (auto aa: a)
-//        std::cout << aa << " ";
-//    std::cout << std::endl;
+    Print_Arr(a);
+
     a.place_end(3);
-//    for (auto aa: a)
-//        std::cout << aa << " ";
-//    std::cout << std::endl;
+    Print_Arr(a);
 
     a.place_end(4);
-//    for (auto aa: a)
-//        std::cout << aa << " ";
-//    std::cout << std::endl;
+    Print_Arr(a);
 
     a.place_end(5);
-//    for (auto aa: a)
-//        std::cout << aa << " ";
-//    std::cout << std::endl;
+    Print_Arr(a);
+
     a.place_end(6);
-//    for (auto aa: a)
-//        std::cout << aa << " ";
-//    std::cout << std::endl;
+    Print_Arr(a);
+
     a.delete_end();
+    Print_Arr(a);
+
     a.place_start(10);
+    Print_Arr(a);
+
     a.place_start(11);
+    Print_Arr(a);
+
     a.place_start(12);
+    Print_Arr(a);
+
     a.place_start(13);
-    for (auto aa: a)
-        std::cout << aa << " ";
+    Print_Arr(a);
 
     std::vector<int> A(5);
-    A[0] = 10;
-    A[1] = 9;
-    A[2] = 8;
-    A[3] = 7;
-    A[4] = 6;
+    A[0] = 1;
+    A[1] = 2;
+    A[2] = 3;
+    A[3] = 2;
+    A[4] = 1;
 
     std::cout << std::endl;
-    Print_Bool(any_of(A.begin(), A.end(), [](int a) { return a > 0; }));
+    Print_Bool(one_of(A.begin(), A.end(), [](int a) { return a == 1; }));
 
-    std::cout << std::endl;
-    Print_Bool(is_sorted(A.begin(), A.end(), [](int a, int b) { return a > b; }));
+
+    Print_Bool(is_palindrome(A.begin(), A.end(), [](int a, int b) { return a == b; }));
+
+
+    auto result = find_not(A.begin(), A.end(), 1);
+    Print_Bool(result != A.end());
+
+    std::vector<Student> students(4);
+    students[0] = {"Ivanov", 3};
+    students[1] = {"Tsarev", 5};
+    students[2] = {"Krylov", 4};
+    students[3] = {"Trek", 2};
+    Print_Bool(None_of(students.begin(), students.end(),
+                       [](const Student &a) { return a.grade == 5; }));
 
     return 0;
 }
