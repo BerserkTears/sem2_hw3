@@ -41,10 +41,7 @@ public:
     }
 
     T &operator[](size_t pos) {
-        if (pos >= size_) {
-            exit(1);
-        }
-        return data_[pos];
+        return data_[(pos + start_) % size_];
     }
 
     const T &operator[](size_t pos) const {
@@ -339,14 +336,14 @@ int main() {
     A[0] = 1;
     A[1] = 2;
     A[2] = 3;
-    A[3] = 2;
-    A[4] = 1;
+    A[3] = -2;
+    A[4] = -1;
 
     std::cout << std::endl;
     Print_Bool(one_of(A.begin(), A.end(), [](int a) { return a == 1; }));
 
 
-    Print_Bool(is_palindrome(A.begin(), A.end(), [](int a, int b) { return a == b; }));
+    Print_Bool(is_palindrome(A.begin(), A.end(), [](int a, int b) { return a == -b; }));
 
 
     auto result = find_not(A.begin(), A.end(), 1);
