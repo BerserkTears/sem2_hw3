@@ -265,12 +265,13 @@ constexpr T find_not(T begin, T end, const U &element) {
 
 template<typename T, typename U>
 constexpr T find_backwards(T begin, T end, const U &element) {
-    while (begin != end) {
+    T it = end - 1;
+    while (begin != it) {
         if (*end == element)
-            return &end;
-        end--;
+            return it;
+        it--;
     }
-    return begin;
+    return end;
 }
 
 template<typename T, typename Pred>
